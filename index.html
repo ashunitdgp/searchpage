@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Search </title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/static.js"></script>
+  <script src="js/jquery.progresstimer.js"></script>
+  <link rel="stylesheet" href="css/static.css">
+
+
+<body>
+
+
+  <section class="search-sec">
+    <div class="container">
+      <form action="#" method="post" novalidate="novalidate">
+        <div class="row">
+          <div class="col-md-8 col-md-offset-2">
+            <div class="row">
+              <div class="col-lg-4 col-md-4 col-sm-12 p-0">
+                <input id="firstName" type="text" class="form-control search-slt" placeholder="Enter First Name">
+              </div>
+              <div class="col-lg-4 col-md-4 col-sm-12 p-0">
+                <input id="lastName" type="text" class="form-control search-slt" placeholder="Enter Last Name">
+              </div>
+
+              <div class="col-lg-4 col-md-4 col-sm-12 p-0">
+                <button type="button" class="btn btn-danger wrn-btn srch">Search</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  <div class="container prog">
+    <div class="loading-progress"></div>
+  </div>
+  <section class="table-responsive">
+    <div class="container">
+      <table class="table table-hover table-bordered results text-center">
+        <thead class="text-center">
+          <tr>
+            <th>list No</th>
+            <th>Exam No</th>
+            <th>Group No</th>
+            <th class="">First Name </th>
+            <th class="">Last Name </th>
+            <th class="">list agency desc</th>
+            <th class="">list title desc</th>
+          </tr>
+
+        </thead>
+        <tbody id="a">
+
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+
+    $(document).ready(function () {
+      $(".srch").click(function () {
+
+        var x = $("#firstName").val().toUpperCase();
+        var y = $("#lastName").val().toUpperCase();
+
+        var listdata;
+        var paramList;
+        if (x == "" && y != "") {
+          paramList = { last_name: y };
+        }
+        else if (y == "" && x != "") {
+          paramList = { first_name: x };
+        } else if (x == "" && y == "") {
+          paramList = 0;
+        } else if (x != "" && y != "") {
+          paramList = { first_name: x, last_name: y };
+        }
+        var progress = $(".loading-progress").progressTimer({
+          timeLimit: 10,
+          onFinish: function () {
+
+          }
+        });
+        $.ajax({
+
+          url: 'https://data.cityofnewyork.us/resource/5scm-b38n.json',
+          data: paramList,
+          success: function (response) {
+            if (response.length != 0) {
+              var trHTML = '';
+              $('#a').empty();
+              $.each(response, function (i, item) {
+                trHTML += '<tr><td>' + item.list_no + '</td><td>' + item.exam_no +
+                  '</td><td>' + item.group_no + '</td><td>' + item.first_name +
+                  '</td><td>' + item.last_name + '</td><td>' + item.list_agency_desc +
+                  '</td><td>' + item.list_title_desc +
+                  '</td></tr>';
+              });
+              $('#a').append(trHTML);
+
+              $(".results").css("visibility", "visible");
+            }
+            else {
+              $(".results").css("visibility", "hidden");
+              alert('No Record Found');
+            }
+          },
+          error: function (response, errorThrown) {
+            alert('request failed :' + errorThrown);
+          }
+        }).error(function () {
+          progress.progressTimer('error', {
+            errorText: 'ERROR!',
+            onFinish: function () {
+              alert('There was an error processing your information!');
+            }
+          });
+        }).done(function () {
+          progress.progressTimer('complete');
+        });
+
+      })
+
+
+    });
+
+  </script>
+
+</body>
+
+</html>
